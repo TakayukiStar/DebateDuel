@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debate Duel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0f1117;
+        --surface: #1a1d27;
+        --surface-2: #252836;
+        --surface-3: #2d3142;
+        --border: #2e3247;
+        --text: #e4e6f0;
+        --text-muted: #8b8fa3;
+        --accent: #6c5ce7;
+        --accent-glow: rgba(108, 92, 231, 0.3);
+        --green: #00b894;
+        --green-glow: rgba(0, 184, 148, 0.3);
+        --red: #e17055;
+        --red-glow: rgba(225, 112, 85, 0.3);
+        --yellow: #fdcb6e;
+        --orange: #e17055;
+        --blue: #74b9ff;
+        --pink: #fd79a8;
+        --radius: 16px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "DM Sans", "Noto Sans JP", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .header {
+        padding: 14px 16px 8px;
+        text-align: center;
+        width: 100%;
+        max-width: 720px;
+      }
+      .header h1 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #e17055, #fdcb6e, #6c5ce7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .header .subtitle {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .lang-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .lang-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+      }
+      .lang-group label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+      .lang-select {
+        padding: 7px 10px;
+        border-radius: 10px;
+        border: 2px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        font-family: "DM Sans", "Noto Sans JP", sans-serif;
+        font-size: 0.8rem;
+        outline: none;
+        cursor: pointer;
+        min-width: 160px;
+      }
+      .lang-select:focus {
+        border-color: var(--accent);
+      }
+      .lang-select.prof {
+        border-color: rgba(116, 185, 255, 0.4);
+      }
+      .lang-arrow {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        margin: 0 2px;
+      }
+      .mode-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 10px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+      .mode-badge.bi {
+        background: rgba(108, 92, 231, 0.2);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+      }
+      .mode-badge.mono {
+        background: rgba(0, 184, 148, 0.15);
+        color: var(--green);
+        border: 1px solid var(--green);
+      }
+
+      .action-row {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      .action-btn {
+        padding: 8px 20px;
+        border-radius: 24px;
+        font-family: "DM Sans", "Noto Sans JP", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid;
+      }
+      .action-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .start-btn {
+        border-color: var(--green);
+        background: rgba(0, 184, 148, 0.12);
+        color: var(--green);
+      }
+      .start-btn:not(:disabled):hover {
+        background: var(--green);
+        color: #fff;
+        transform: scale(1.03);
+      }
+      .reset-btn {
+        border-color: var(--red);
+        background: rgba(225, 112, 85, 0.08);
+        color: var(--red);
+      }
+      .reset-btn:not(:disabled):hover {
+        background: var(--red);
+        color: #fff;
+        transform: scale(1.03);
+      }
+
+      .settings-row {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .speed-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .speed-label {
+        font-size: 0.63rem;
+        color: var(--text-muted);
+        font-family: "JetBrains Mono", monospace;
+      }
+      .speed-slider {
+        -webkit-appearance: none;
+        width: 70px;
+        height: 3px;
+        background: var(--border);
+        border-radius: 2px;
+        outline: none;
+      }
+      .speed-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+      }
+      .speed-val {
+        font-size: 0.63rem;
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        min-width: 28px;
+      }
+      .toggle-pill {
+        padding: 4px 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text-muted);
+        font-size: 0.66rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .toggle-pill.active {
+        background: var(--green);
+        color: #fff;
+        border-color: var(--green);
+      }
+
+      .chat-container {
+        flex: 1;
+        width: 100%;
+        max-width: 720px;
+        padding: 0 12px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-bottom: 240px;
+      }
+      .msg {
+        max-width: 88%;
+        padding: 11px 15px;
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+        line-height: 1.55;
+        animation: fadeIn 0.3s ease-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .msg.user {
+        align-self: flex-end;
+        background: var(--accent);
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+      .msg .label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 3px;
+        opacity: 0.7;
+      }
+      .msg.ai {
+        align-self: flex-start;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-bottom-left-radius: 4px;
+      }
+      .msg.ai .label {
+        color: var(--green);
+      }
+      .replay-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        padding: 3px 10px;
+        background: rgba(116, 185, 255, 0.1);
+        border: 1px solid rgba(116, 185, 255, 0.25);
+        border-radius: 12px;
+        color: var(--blue);
+        font-size: 0.68rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-style: solid;
+      }
+      .replay-btn:hover {
+        background: rgba(116, 185, 255, 0.25);
+      }
+      .scene-card {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .scene-card:hover {
+        border-color: var(--accent);
+        background: var(--surface-3);
+        transform: translateX(3px);
+      }
+      .scene-card .sc-num {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--accent);
+        min-width: 18px;
+      }
+      .scene-card .sc-text {
+        font-size: 0.84rem;
+        color: var(--text);
+      }
+      .scene-card .sc-ja {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+        line-height: 1.4;
+      }
+      .scenes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .learning-card {
+        align-self: flex-start;
+        max-width: 95%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--green);
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 0.84rem;
+        animation: fadeIn 0.4s ease-out;
+      }
+      .lc-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--green);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 10px;
+      }
+      .lc-section {
+        margin-bottom: 10px;
+      }
+      .lc-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        margin-bottom: 3px;
+      }
+      .lc-translation {
+        color: var(--blue);
+        font-size: 0.85rem;
+        padding: 6px 10px;
+        background: rgba(116, 185, 255, 0.08);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        white-space: pre-line;
+      }
+      .lc-explanation {
+        color: var(--text);
+        line-height: 1.6;
+        font-size: 0.83rem;
+        white-space: pre-line;
+      }
+      .suggestion-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 6px;
+      }
+      .suggestion-item {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .suggestion-item:hover {
+        border-color: var(--accent);
+        background: var(--surface-3);
+        transform: translateX(3px);
+      }
+      .sg-en {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 0.88rem;
+        margin-bottom: 3px;
+      }
+      .sg-badge {
+        display: inline-block;
+        font-size: 0.6rem;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 4px;
+        margin-right: 4px;
+      }
+      .sg-badge.weak {
+        background: rgba(150, 150, 150, 0.2);
+        color: #999;
+      }
+      .sg-badge.strong {
+        background: rgba(0, 184, 148, 0.25);
+        color: var(--green);
+      }
+      .sg-badge.killer {
+        background: linear-gradient(
+          135deg,
+          rgba(253, 203, 110, 0.3),
+          rgba(108, 92, 231, 0.3)
+        );
+        color: #ffd700;
+        text-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
+      }
+      .sg-ja {
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        line-height: 1.5;
+      }
+
+      .stance-container {
+        margin: 12px 0;
+        text-align: center;
+      }
+      .stance-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .stance-btn {
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        border: 2px solid;
+        transition: all 0.2s;
+        font-family: "DM Sans", "Noto Sans JP", sans-serif;
+      }
+      .stance-btn:hover {
+        transform: scale(1.05);
+      }
+      .stance-btn.pro-btn {
+        border-color: var(--green);
+        background: rgba(0, 184, 148, 0.1);
+        color: var(--green);
+      }
+      .stance-btn.pro-btn:hover {
+        background: var(--green);
+        color: #fff;
+      }
+      .stance-btn.con-btn {
+        border-color: var(--orange);
+        background: rgba(225, 112, 85, 0.1);
+        color: var(--orange);
+      }
+      .stance-btn.con-btn:hover {
+        background: var(--orange);
+        color: #fff;
+      }
+      .stance-btn.neutral-btn {
+        border-color: var(--accent);
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--accent);
+      }
+      .stance-btn.neutral-btn:hover {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .battle-gauge {
+        margin: 8px 0 4px;
+        padding: 10px 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .gauge-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.72rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+      .gauge-you {
+        color: #e17055;
+      }
+      .gauge-ai {
+        color: #74b9ff;
+      }
+      .gauge-bar {
+        height: 14px;
+        border-radius: 7px;
+        background: #2d3436;
+        overflow: hidden;
+        display: flex;
+      }
+      .gauge-fill-you {
+        background: linear-gradient(90deg, #e17055, #fab1a0);
+        transition: width 0.8s;
+        border-radius: 7px 0 0 7px;
+      }
+      .gauge-fill-ai {
+        background: linear-gradient(90deg, #74b9ff, #0984e3);
+        transition: width 0.8s;
+        border-radius: 0 7px 7px 0;
+      }
+      .gauge-score {
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin-top: 3px;
+        color: var(--text-muted);
+      }
+      .judge-toggle {
+        font-size: 0.72rem;
+        color: var(--accent);
+        cursor: pointer;
+        margin-top: 4px;
+        text-align: center;
+      }
+      .judge-reason {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        padding: 6px 8px;
+        background: var(--surface-2);
+        border-radius: 8px;
+        margin-top: 4px;
+        display: none;
+        line-height: 1.5;
+      }
+      .gauge-slot {
+        position: fixed;
+        width: 100%;
+        max-width: 720px;
+        padding: 0 16px;
+        z-index: 11;
+        display: none;
+      }
+
+      .controls {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        max-width: 720px;
+        padding: 8px 16px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(to top, var(--bg) 65%, transparent);
+        z-index: 10;
+      }
+      .input-row {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        max-width: 520px;
+        align-items: center;
+      }
+      .text-input {
+        flex: 1;
+        padding: 10px 14px;
+        border-radius: 24px;
+        border: 2px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        font-family: "DM Sans", "Noto Sans JP", sans-serif;
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .text-input:focus {
+        border-color: var(--accent);
+      }
+      .text-input:disabled {
+        opacity: 0.35;
+      }
+      .send-btn {
+        padding: 10px 16px;
+        border-radius: 24px;
+        border: 2px solid var(--accent);
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        font-family: "DM Sans", sans-serif;
+        transition: all 0.2s;
+      }
+      .send-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .skip-fixed-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 3px solid #ffd700;
+        background: rgba(255, 215, 0, 0.1);
+        color: #ffd700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .skip-fixed-btn:hover {
+        background: rgba(255, 215, 0, 0.3);
+        transform: scale(1.1);
+      }
+      .mic-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 3px solid var(--accent);
+        background: var(--surface);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .mic-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .mic-btn.recording {
+        border-color: var(--red);
+        background: rgba(225, 112, 85, 0.15);
+        animation: mic-pulse 1.5s infinite;
+      }
+      @keyframes mic-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 var(--red-glow);
+        }
+        50% {
+          box-shadow: 0 0 0 12px transparent;
+        }
+      }
+      .mic-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: var(--accent);
+      }
+      .mic-btn.recording svg {
+        fill: var(--red);
+      }
+
+      .thinking-bar {
+        position: fixed;
+        bottom: 130px;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 400px;
+        width: 90%;
+        z-index: 100;
+        display: none;
+      }
+      .thinking-bar.visible {
+        display: flex;
+      }
+      .thinking-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        background: linear-gradient(
+          135deg,
+          rgba(225, 112, 85, 0.08),
+          rgba(108, 92, 231, 0.12)
+        );
+        border: 1px solid rgba(225, 112, 85, 0.25);
+        border-radius: 24px;
+        backdrop-filter: blur(10px);
+        margin: 0 auto;
+      }
+      .thinking-emoji {
+        font-size: 1.1rem;
+        animation: tp 2s infinite;
+      }
+      .thinking-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .thinking-wave {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+        margin-left: 4px;
+      }
+      .thinking-wave span {
+        display: block;
+        width: 3px;
+        border-radius: 2px;
+        background: var(--pink);
+        animation: wb 1s ease-in-out infinite;
+      }
+      .thinking-wave span:nth-child(1) {
+        height: 8px;
+      }
+      .thinking-wave span:nth-child(2) {
+        height: 14px;
+        animation-delay: 0.15s;
+      }
+      .thinking-wave span:nth-child(3) {
+        height: 10px;
+        animation-delay: 0.3s;
+      }
+      .thinking-wave span:nth-child(4) {
+        height: 16px;
+        animation-delay: 0.45s;
+      }
+      .thinking-wave span:nth-child(5) {
+        height: 6px;
+        animation-delay: 0.6s;
+      }
+      @keyframes wb {
+        0%,
+        100% {
+          transform: scaleY(1);
+          opacity: 0.4;
+        }
+        50% {
+          transform: scaleY(1.8);
+          opacity: 1;
+        }
+      }
+      @keyframes tp {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.15);
+        }
+      }
+
+      .turn-badge {
+        position: fixed;
+        top: 8px;
+        right: 12px;
+        padding: 4px 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        font-family: "JetBrains Mono", monospace;
+        z-index: 50;
+        display: none;
+      }
+      .turn-badge.visible {
+        display: block;
+      }
+
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+      }
+      .confetti-piece {
+        position: fixed;
+        top: -10px;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 1;
+      }
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+      .falling-leaf {
+        position: fixed;
+        top: -30px;
+        z-index: 9999;
+        pointer-events: none;
+        font-size: 1.5rem;
+      }
+      @keyframes leafFall {
+        0% {
+          transform: translateY(0) rotate(0) translateX(0);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translateY(50vh) rotate(180deg) translateX(-20px);
+        }
+        100% {
+          transform: translateY(110vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+      .finish-card-win {
+        border: 2px solid #ffd700 !important;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+      }
+      .finish-card-lose {
+        border: 2px solid #e17055 !important;
+        box-shadow: 0 0 20px rgba(225, 112, 85, 0.2);
+      }
+      .finish-card-draw {
+        border: 2px solid #a29bfe !important;
+        box-shadow: 0 0 20px rgba(162, 155, 254, 0.3);
+      }
+      .report-btn {
+        padding: 10px 24px;
+        border-radius: 20px;
+        border: 2px solid #ffd700;
+        background: rgba(255, 215, 0, 0.1);
+        color: #ffd700;
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: "DM Sans", "Noto Sans JP", sans-serif;
+        margin-top: 6px;
+      }
+      .report-btn:hover {
+        background: rgba(255, 215, 0, 0.25);
+        transform: scale(1.03);
+      }
+      .report-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .report-btn.generating {
+        animation: reportPulse 1.5s infinite;
+      }
+      @keyframes reportPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 0 8px transparent;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header" id="hdr">
+      <h1>⚔️ Debate Duel</h1>
+      <div class="subtitle">71 Languages — Bilingual Learning Mode</div>
+      <div class="lang-row">
+        <div class="lang-group">
+          <label>🧑 Your Language</label
+          ><select class="lang-select" id="user-lang"></select>
+        </div>
+        <span class="lang-arrow">⚔️</span>
+        <div class="lang-group">
+          <label>🎓 Professor's Language</label
+          ><select class="lang-select prof" id="prof-lang"></select>
+        </div>
+      </div>
+      <div id="mode-indicator" style="text-align: center"></div>
+      <div class="action-row">
+        <button
+          class="action-btn start-btn"
+          id="start-btn"
+          onclick="startDebate()"
+        >
+          ⚔️ Start
+        </button>
+        <button
+          class="action-btn reset-btn"
+          id="reset-btn"
+          disabled
+          onclick="resetSession()"
+        >
+          ✕ Reset
+        </button>
+      </div>
+      <div class="settings-row">
+        <div class="speed-item">
+          <span class="speed-label">🗣️</span>
+          <input
+            type="range"
+            class="speed-slider"
+            id="tts-speed"
+            min="0.5"
+            max="1.5"
+            step="0.1"
+            value="1.0"
+            oninput="document.getElementById('sv').textContent=this.value+'x'"
+          />
+          <span class="speed-val" id="sv">1.0x</span>
+        </div>
+        <div class="toggle-pill active" id="narr-t" onclick="toggleNarr()">
+          🔊 Narration
+        </div>
+      </div>
+    </div>
+    <div class="turn-badge" id="turn-badge"></div>
+    <div class="chat-container" id="chat"></div>
+    <div class="gauge-slot" id="gauge-slot"></div>
+    <div class="thinking-bar" id="thinking-bar">
+      <div class="thinking-pill">
+        <span class="thinking-emoji">🤔</span
+        ><span class="thinking-text">Professor is thinking…</span>
+        <div class="thinking-wave">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+    <div class="controls" id="controls">
+      <div class="input-row">
+        <button class="mic-btn" id="mic-btn" disabled onclick="toggleRec()">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"
+            />
+          </svg>
+        </button>
+        <input
+          type="text"
+          class="text-input"
+          id="text-input"
+          placeholder="Type your argument…"
+          disabled
+        />
+        <button class="send-btn" id="send-btn" disabled onclick="sendText()">
+          Send
+        </button>
+        <button class="skip-fixed-btn" id="skip-fixed" onclick="skipTTS()">
+          ⏭
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let SID = null,
+        active = false,
+        narrOn = true,
+        ttsGen = 0,
+        curAudio = null,
+        ttsAbort = null;
+      let profTTS = "en-US-JennyNeural",
+        userTTS = "ja-JP-NanamiNeural";
+      let userLang = "ja",
+        profLang = "en",
+        bilingual = true;
+      let isRec = false,
+        mediaRec = null,
+        chunks = [];
+      let gaugeHistory = []; // ★ [{turn,score,reason,userMsg}]
+      let debateInfo = {
+        topic: "",
+        userStance: "",
+        profStance: "",
+        userLangName: "",
+        profLangName: "",
+      };
+      const synth = window.speechSynthesis;
+      const $ = (id) => document.getElementById(id);
+      const chatEl = $("chat"),
+        textIn = $("text-input"),
+        sendBtn = $("send-btn"),
+        micBtn = $("mic-btn");
+      const startBtn = $("start-btn"),
+        resetBtn = $("reset-btn"),
+        turnBadge = $("turn-badge");
+
+      function esc(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+      function scroll() {
+        setTimeout(() => {
+          chatEl.scrollTop = chatEl.scrollHeight + 1000;
+        }, 80);
+      }
+      function showTh() {
+        $("thinking-bar").classList.add("visible");
+      }
+      function hideTh() {
+        $("thinking-bar").classList.remove("visible");
+      }
+      function toggleNarr() {
+        narrOn = !narrOn;
+        const e = $("narr-t");
+        e.classList.toggle("active", narrOn);
+        e.textContent = narrOn ? "🔊 Narration" : "🔇 OFF";
+      }
+      function spd() {
+        return parseFloat($("tts-speed").value);
+      }
+
+      // Load languages
+      fetch("/languages")
+        .then((r) => r.json())
+        .then((langs) => {
+          const opts = langs
+            .map(
+              (l) => `<option value="${l.code}">${l.name} (${l.code})</option>`
+            )
+            .join("");
+          $("user-lang").innerHTML = opts;
+          $("prof-lang").innerHTML = opts;
+          $("user-lang").value = "ja";
+          $("prof-lang").value = "en";
+          updateModeIndicator();
+        });
+      $("user-lang").onchange = $("prof-lang").onchange = updateModeIndicator;
+
+      function updateModeIndicator() {
+        const u = $("user-lang").value,
+          p = $("prof-lang").value;
+        const el = $("mode-indicator");
+        if (u === p) {
+          el.innerHTML = `<span class="mode-badge mono">🟢 Same Language Mode</span>`;
+        } else {
+          el.innerHTML = `<span class="mode-badge bi">🌐 Bilingual Learning Mode</span>`;
+        }
+      }
+
+      // ============================================================================
+      // TTS
+      // ============================================================================
+      function abortTTS() {
+        ttsGen++;
+        synth.cancel();
+        if (curAudio) {
+          curAudio.pause();
+          curAudio.src = "";
+          curAudio = null;
+        }
+        if (ttsAbort) {
+          ttsAbort.abort();
+          ttsAbort = null;
+        }
+      }
+      function skipTTS() {
+        abortTTS();
+        ttsGen++;
+        textIn.disabled = false;
+        sendBtn.disabled = false;
+        micBtn.disabled = false;
+      }
+      function splitT(t) {
+        if (t.length <= 300) return [t];
+        const c = [];
+        let b = "";
+        for (const s of t.split(/(?<=[.!?。！？])\s*/)) {
+          if ((b + " " + s).length > 280 && b) {
+            c.push(b.trim());
+            b = s;
+          } else b += (b ? " " : "") + s;
+        }
+        if (b.trim()) c.push(b.trim());
+        return c.length ? c : [t];
+      }
+
+      async function tts(text, voice) {
+        const g = ttsGen;
+        if (g !== ttsGen) return;
+        const ctrl = new AbortController();
+        ttsAbort = ctrl;
+        try {
+          const res = await fetch("/tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, voice, rate: spd() }),
+            signal: ctrl.signal,
+          });
+          if (g !== ttsGen) return;
+          const blob = await res.blob();
+          if (g !== ttsGen) return;
+          const url = URL.createObjectURL(blob);
+          return new Promise((r) => {
+            if (g !== ttsGen) {
+              URL.revokeObjectURL(url);
+              r();
+              return;
+            }
+            if (curAudio) {
+              curAudio.pause();
+              curAudio.src = "";
+              curAudio = null;
+            }
+            const a = new Audio(url);
+            curAudio = a;
+            a.onended = a.onerror = () => {
+              curAudio = null;
+              URL.revokeObjectURL(url);
+              r();
+            };
+            a.play().catch(() => {
+              URL.revokeObjectURL(url);
+              r();
+            });
+          });
+        } catch (e) {
+          if (e.name === "AbortError") return;
+        }
+      }
+      async function speakProf(text) {
+        const g = ttsGen;
+        for (const c of splitT(text)) {
+          if (g !== ttsGen) return;
+          await tts(c, profTTS);
+        }
+      }
+      async function speakUser(text) {
+        const g = ttsGen;
+        for (const c of splitT(text)) {
+          if (g !== ttsGen) return;
+          await tts(c, userTTS);
+        }
+      }
+
+      // ============================================================================
+      // Mic (Whisper — bilingual: tries prof_lang first, then user_lang)
+      // ============================================================================
+      async function toggleRec() {
+        if (isRec) {
+          mediaRec.stop();
+          return;
+        }
+        abortTTS(); // ★ 録音開始時にTTS即中断
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          chunks = [];
+          mediaRec = new MediaRecorder(stream, {
+            mimeType: "audio/webm;codecs=opus",
+          });
+          mediaRec.ondataavailable = (e) => {
+            if (e.data.size > 0) chunks.push(e.data);
+          };
+          mediaRec.onstop = async () => {
+            stream.getTracks().forEach((t) => t.stop());
+            isRec = false;
+            micBtn.classList.remove("recording");
+            if (!chunks.length) return;
+            const blob = new Blob(chunks, { type: "audio/webm" });
+            const fd = new FormData();
+            fd.append("audio", blob, "rec.webm");
+            // Primary = prof_lang (the language they're debating in), secondary = user_lang
+            fd.append("lang1", bilingual ? profLang : userLang);
+            if (bilingual) fd.append("lang2", userLang);
+            showTh();
+            try {
+              const res = await fetch("/transcribe", {
+                method: "POST",
+                body: fd,
+              });
+              const data = await res.json();
+              hideTh();
+              if (data.text) {
+                textIn.value = data.text;
+                sendText();
+              }
+            } catch (e) {
+              hideTh();
+              addSys("❌ STT: " + e.message);
+            }
+          };
+          mediaRec.start();
+          isRec = true;
+          micBtn.classList.add("recording");
+        } catch {
+          addSys("🎤 Mic denied");
+        }
+      }
+
+      // ============================================================================
+      // Session
+      // ============================================================================
+      async function startDebate() {
+        userLang = $("user-lang").value || "ja";
+        profLang = $("prof-lang").value || "en";
+        startBtn.disabled = true;
+        showTh();
+        try {
+          const res = await fetch("/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_lang: userLang, prof_lang: profLang }),
+          });
+          const data = await res.json();
+          hideTh();
+          SID = data.session_id;
+          active = true;
+          bilingual = data.bilingual;
+          debateInfo.userLangName = data.user_lang_name;
+          debateInfo.profLangName = data.prof_lang_name;
+          profTTS = data.prof_tts;
+          userTTS = data.user_tts;
+          resetBtn.disabled = false;
+          $("user-lang").disabled = true;
+          $("prof-lang").disabled = true;
+          showTopics(data.topics);
+        } catch (e) {
+          hideTh();
+          addSys("❌ " + e.message);
+          startBtn.disabled = false;
+        }
+      }
+      function resetSession() {
+        abortTTS();
+        active = false;
+        SID = null;
+        chatEl.innerHTML = "";
+        textIn.disabled = true;
+        sendBtn.disabled = true;
+        micBtn.disabled = true;
+        startBtn.disabled = false;
+        resetBtn.disabled = true;
+        $("user-lang").disabled = false;
+        $("prof-lang").disabled = false;
+        $("gauge-slot").style.display = "none";
+        $("gauge-slot").innerHTML = "";
+        turnBadge.classList.remove("visible");
+        gaugeHistory = [];
+        debateInfo = {
+          topic: "",
+          userStance: "",
+          profStance: "",
+          userLangName: "",
+          profLangName: "",
+        };
+      }
+
+      // ============================================================================
+      // UI Helpers
+      // ============================================================================
+      function addAI(reply) {
+        const d = document.createElement("div");
+        d.className = "msg ai";
+        const rid = "r_" + Date.now();
+        d.innerHTML = `<div class="label">Professor</div><div>${esc(
+          reply
+        )}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+      <button class="replay-btn" onclick="replayAI('${rid}')">🔄 Replay</button>
+      <button class="replay-btn" onclick="skipTTS()" style="border-color:#ffd700;color:#ffd700;background:rgba(255,215,0,.1)">⏭ Skip</button>
+    </div>`;
+        d.dataset.text = reply;
+        d.id = rid;
+        chatEl.appendChild(d);
+        scroll();
+      }
+      function replayAI(id) {
+        const e = document.getElementById(id);
+        if (e?.dataset.text) {
+          abortTTS();
+          speakProf(e.dataset.text);
+        }
+      }
+      function addUser(t) {
+        const d = document.createElement("div");
+        d.className = "msg user";
+        d.innerHTML = `<div class="label">You</div><div>${esc(t)}</div>`;
+        chatEl.appendChild(d);
+        scroll();
+      }
+      function addSys(t) {
+        const d = document.createElement("div");
+        d.style.cssText =
+          "font-size:.78rem;color:var(--text-muted);padding:4px 8px;text-align:center";
+        d.textContent = t;
+        chatEl.appendChild(d);
+        scroll();
+      }
+
+      function showTopics(topics) {
+        const c = document.createElement("div");
+        c.className = "scenes-list";
+        topics.forEach((t, i) => {
+          const en = t.en || "";
+          const profText = t.prof || en;
+          const userText = t.user || en;
+          const hint = t.hint || "";
+          // Main line: prof_lang version (what Professor speaks)
+          // Sub line: bilingual → user_lang version; mono → English original (if different)
+          let main = profText;
+          let sub = "";
+          if (bilingual) {
+            sub = userText + (hint ? "\n💡 " + hint : "");
+          } else {
+            // mono: main=translated, sub=English original if different
+            main = userText || profText;
+            sub = main !== en ? en : "";
+          }
+          const card = document.createElement("div");
+          card.className = "scene-card";
+          card.innerHTML = `<div class="sc-num">${
+            i + 1
+          }</div><div><div class="sc-text">${esc(main)}</div>${
+            sub ? `<div class="sc-ja">${esc(sub)}</div>` : ""
+          }</div>`;
+          card.onclick = () => selTopic(en, main);
+          c.appendChild(card);
+        });
+        chatEl.appendChild(c);
+        scroll();
+      }
+
+      async function selTopic(en, display) {
+        addUser(display);
+        debateInfo.topic = en; // ★ 記録
+        // Disable all topic cards
+        document.querySelectorAll(".scene-card").forEach((c) => {
+          c.style.pointerEvents = "none";
+          c.style.opacity = ".4";
+        });
+        showTh();
+        try {
+          const res = await fetch("/select_topic", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: SID, topic_en: en }),
+          });
+          const data = await res.json();
+          hideTh();
+          if (data.debate_stance_choice) showStance();
+        } catch (e) {
+          hideTh();
+          addSys("❌ " + e.message);
+        }
+      }
+
+      function showStance() {
+        const d = document.createElement("div");
+        d.className = "stance-container";
+        d.innerHTML = `<div class="stance-buttons">
+    <button class="stance-btn pro-btn" onclick="selStance('pro')">👍 FOR</button>
+    <button class="stance-btn con-btn" onclick="selStance('con')">👎 AGAINST</button>
+    <button class="stance-btn neutral-btn" onclick="selStance('neutral')">🔍 NEUTRAL</button></div>`;
+        chatEl.appendChild(d);
+        scroll();
+      }
+
+      async function selStance(stance) {
+        const stanceLabels = { pro: "FOR", con: "AGAINST", neutral: "NEUTRAL" };
+        debateInfo.userStance = stanceLabels[stance] || "NEUTRAL";
+        addUser(
+          { pro: "👍 FOR", con: "👎 AGAINST", neutral: "🔍 NEUTRAL" }[stance]
+        );
+        // Disable all stance buttons
+        document.querySelectorAll(".stance-btn").forEach((b) => {
+          b.disabled = true;
+          b.style.opacity = ".4";
+          b.style.pointerEvents = "none";
+        });
+        showTh();
+        textIn.disabled = true;
+        sendBtn.disabled = true;
+        micBtn.disabled = true;
+        try {
+          const res = await fetch("/debate_stance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: SID, stance }),
+          });
+          const data = await res.json();
+          hideTh();
+          const g = ++ttsGen; // ★ 新世代
+          // ★ Record professor stance + initial gauge
+          debateInfo.profStance =
+            stance === "pro"
+              ? "AGAINST"
+              : stance === "con"
+              ? "FOR"
+              : Math.random() > 0.5
+              ? "FOR"
+              : "AGAINST";
+          gaugeHistory.push({
+            turn: 0,
+            score: 50,
+            reason: "Opening",
+            userMsg: "[Debate Start]",
+          });
+          addAI(data.reply);
+          textIn.disabled = false;
+          sendBtn.disabled = false;
+          micBtn.disabled = false;
+          textIn.focus();
+          if (data.debate_score !== undefined) initGauge(data.debate_score);
+          turnBadge.textContent = "Turn 0";
+          turnBadge.classList.add("visible");
+          if (narrOn) await speakProf(data.reply);
+          if (data.learning) {
+            addLC(data.learning);
+            if (narrOn && g === ttsGen) await narrLC(data.learning, g);
+          }
+        } catch (e) {
+          hideTh();
+          addSys("❌ " + e.message);
+        }
+      }
+
+      // ============================================================================
+      // Gauge
+      // ============================================================================
+      function initGauge(sc) {
+        const sl = $("gauge-slot");
+        sl.style.display = "block";
+        const cr = $("controls").getBoundingClientRect();
+        sl.style.bottom = window.innerHeight - cr.top + 4 + "px";
+        sl.innerHTML = `<div class="battle-gauge"><div class="gauge-header"><span class="gauge-you">🔥 YOU</span><span class="gauge-ai">🎓 PROF</span></div><div class="gauge-bar"><div class="gauge-fill-you" id="gy" style="width:${sc}%"></div><div class="gauge-fill-ai" id="ga" style="width:${
+          100 - sc
+        }%"></div></div><div class="gauge-score" id="gs">${sc}:${
+          100 - sc
+        }</div><div class="judge-toggle" onclick="toggleJR()">📋 Judge ▼</div><div class="judge-reason" id="jr">Started!</div></div>`;
+        // Adjust padding for gauge visibility
+        chatEl.style.paddingBottom = "300px";
+        scroll();
+      }
+      function updGauge(sc, reason) {
+        const y = $("gy"),
+          a = $("ga"),
+          s = $("gs"),
+          r = $("jr");
+        if (!y) return;
+        y.style.width = sc + "%";
+        a.style.width = 100 - sc + "%";
+        s.textContent = `${sc}:${100 - sc}`;
+        if (reason && r) r.textContent = reason;
+      }
+      function toggleJR() {
+        const e = $("jr");
+        if (!e) return;
+        const h = !e.style.display || e.style.display === "none";
+        e.style.display = h ? "block" : "none";
+        e.previousElementSibling.textContent = h ? "📋 Judge ▲" : "📋 Judge ▼";
+      }
+
+      // ============================================================================
+      // Learning Card — adapts to bilingual vs mono
+      // ============================================================================
+      function addLC(lr) {
+        const card = document.createElement("div");
+        card.className = "learning-card";
+        let h = `<div class="lc-header">📚 ${
+          bilingual ? "Learning Corner" : "Analysis"
+        }</div>`;
+
+        // Bilingual: reply_ja = translation in user's language
+        if (bilingual && lr.reply_ja)
+          h += `<div class="lc-section"><div class="lc-label">🔤 Translation</div><div class="lc-translation">${esc(
+            lr.reply_ja
+          )}</div></div>`;
+        if (lr.explanation)
+          h += `<div class="lc-section"><div class="lc-label">📝 ${
+            bilingual ? "Explanation" : "Analysis"
+          }</div><div class="lc-explanation">${esc(
+            lr.explanation
+          )}</div></div>`;
+
+        const sgs = lr.suggestions || [];
+        if (sgs.length) {
+          h += `<div class="lc-section"><div class="lc-label">💡 Suggestions (tap to use)</div><div class="suggestion-list">`;
+          sgs.forEach((s) => {
+            const q = (s.quality || "").toLowerCase();
+            let badge =
+              q === "killer"
+                ? `<span class="sg-badge killer">⭐KILLER</span>`
+                : q === "strong"
+                ? `<span class="sg-badge strong">💪STRONG</span>`
+                : q === "weak"
+                ? `<span class="sg-badge weak">△WEAK</span>`
+                : "";
+            // bilingual: english=prof_lang, japanese=user_lang summary
+            // mono: text=the_lang only
+            const mainText = s.english || s.text || "";
+            const subText = bilingual ? s.japanese || "" : "";
+            h += `<div class="suggestion-item" onclick="useSugg(this)" data-text="${esc(
+              mainText
+            )}">${badge}<div class="sg-en">${esc(mainText)}</div>${
+              subText ? `<div class="sg-ja">${esc(subText)}</div>` : ""
+            }</div>`;
+          });
+          h += `</div></div>`;
+        }
+        card.innerHTML = h;
+        chatEl.appendChild(card);
+        scroll();
+      }
+      function useSugg(el) {
+        if (el.dataset.text) {
+          abortTTS();
+          textIn.value = el.dataset.text;
+          sendText();
+        }
+      }
+
+      async function narrLC(lr, g) {
+        if (bilingual) {
+          // Read user-lang translation, then explanation
+          if (lr.reply_ja && g === ttsGen) await speakUser(lr.reply_ja);
+          if (lr.explanation && g === ttsGen) await speakUser(lr.explanation);
+          // Read suggestions: prof-lang text, then user-lang summary
+          for (const s of lr.suggestions || []) {
+            if (g !== ttsGen) return;
+            const main = s.english || s.text || "";
+            if (main) await speakProf(main);
+            if (g !== ttsGen) return;
+            if (s.japanese) await speakUser(s.japanese);
+          }
+        } else {
+          // Mono: everything in one language
+          if (lr.explanation && g === ttsGen) await speakUser(lr.explanation);
+          for (const s of lr.suggestions || []) {
+            if (g !== ttsGen) return;
+            const t = s.text || s.english || "";
+            if (t) await speakUser(t);
+          }
+        }
+      }
+
+      // ============================================================================
+      // Chat
+      // ============================================================================
+      async function sendText() {
+        const txt = textIn.value.trim();
+        if (!txt || !SID) return;
+        abortTTS(); // ★ 送信時にTTS即中断
+        textIn.value = "";
+        addUser(txt);
+        textIn.disabled = true;
+        sendBtn.disabled = true;
+        micBtn.disabled = true;
+        showTh();
+        try {
+          const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: SID, text: txt }),
+          });
+          const data = await res.json();
+          hideTh();
+          const g = ++ttsGen; // ★ 新世代開始
+          addAI(data.reply);
+          textIn.disabled = false;
+          sendBtn.disabled = false;
+          micBtn.disabled = false;
+          textIn.focus();
+          turnBadge.textContent = `Turn ${
+            document.querySelectorAll(".msg.user").length
+          }`;
+          if (data.judge?.user_score !== undefined) {
+            updGauge(data.judge.user_score, data.judge.reason || "");
+            const turnNum = gaugeHistory.length;
+            gaugeHistory.push({
+              turn: turnNum,
+              score: data.judge.user_score,
+              reason: data.judge.reason || "",
+              userMsg: txt.substring(0, 100),
+            });
+          }
+          if (data.debate_finish) {
+            await handleFinish(data.debate_finish, data.reply, g);
+            return;
+          }
+          // ★ TTS再生（awaitだがabortTTSで即中断される）
+          if (narrOn) await speakProf(data.reply);
+          // ★ LC表示は常に行う
+          if (data.learning) {
+            addLC(data.learning);
+            // ★ ナレーションはgenが一致=まだユーザー操作がない場合のみ
+            if (narrOn && g === ttsGen) await narrLC(data.learning, g);
+          }
+        } catch (e) {
+          hideTh();
+          addSys("❌ " + e.message);
+          textIn.disabled = false;
+          sendBtn.disabled = false;
+          micBtn.disabled = false;
+        }
+      }
+      textIn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey && !sendBtn.disabled) {
+          e.preventDefault();
+          sendText();
+        }
+      });
+      textIn.addEventListener("focus", () => abortTTS()); // ★ 入力フォーカスでTTS中断
+
+      // ============================================================================
+      // Finish
+      // ============================================================================
+      function playVictory() {
+        const colors = ["#ffd700", "#ff6b6b", "#48dbfb", "#ff9ff3", "#00d2d3"],
+          shapes = ["■", "●", "▲", "★"];
+        for (let i = 0; i < 80; i++) {
+          const e = document.createElement("div");
+          e.className = "confetti-piece";
+          e.style.left = Math.random() * 100 + "vw";
+          e.textContent = shapes[i % 4];
+          e.style.color = colors[i % 5];
+          e.style.fontSize = 8 + Math.random() * 14 + "px";
+          e.style.width = e.style.height = "auto";
+          const d = 2 + Math.random() * 2;
+          e.style.animation = `confettiFall ${d}s ease-out ${
+            Math.random() * 1.5
+          }s forwards`;
+          document.body.appendChild(e);
+          setTimeout(() => e.remove(), (d + 2) * 1000);
+        }
+      }
+      function playDefeat() {
+        for (let i = 0; i < 5; i++) {
+          const e = document.createElement("div");
+          e.className = "falling-leaf";
+          e.textContent = "🍂";
+          e.style.left = 10 + Math.random() * 80 + "vw";
+          const d = 3.5 + Math.random() * 2;
+          e.style.animation = `leafFall ${d}s ease-in ${i * 0.4}s forwards`;
+          document.body.appendChild(e);
+          setTimeout(() => e.remove(), (d + 2) * 1000);
+        }
+      }
+      function playDraw() {
+        ["⚔️", "🤝", "💪", "🔥", "⚡"].forEach((em, i) => {
+          const e = document.createElement("div");
+          e.style.cssText = `position:fixed;z-index:9999;pointer-events:none;font-size:${
+            1.5 + Math.random()
+          }rem;left:${Math.random() * 100}vw;top:${
+            Math.random() * 60 + 10
+          }vh;opacity:0;transition:all .5s`;
+          e.textContent = em;
+          document.body.appendChild(e);
+          setTimeout(() => {
+            e.style.opacity = "1";
+            e.style.transform = "translateY(-20px)";
+          }, i * 120);
+          setTimeout(() => (e.style.opacity = "0"), 1500 + i * 120);
+          setTimeout(() => e.remove(), 3000);
+        });
+      }
+
+      async function handleFinish(rt, lastReply, g) {
+        if (narrOn) await speakProf(lastReply);
+        showTh();
+        try {
+          const res = await fetch("/debate_finish", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: SID, result: rt }),
+          });
+          const data = await res.json();
+          hideTh();
+          // ★ Save for report generation
+          window._finishData = {
+            result: rt,
+            advice: data.advice || "",
+            final_score: data.final_score || 50,
+          };
+          if (rt === "student_wins") playVictory();
+          else if (rt === "draw") playDraw();
+          else playDefeat();
+          const icons = {
+            student_wins: "🏆",
+            professor_wins: "📖",
+            draw: "🤝",
+          };
+          const titles = {
+            student_wins: "YOU WIN!",
+            professor_wins: "GAME OVER",
+            draw: "DRAW!",
+          };
+          const cls = {
+            student_wins: "finish-card-win",
+            professor_wins: "finish-card-lose",
+            draw: "finish-card-draw",
+          };
+          const card = document.createElement("div");
+          card.className = "learning-card " + (cls[rt] || "");
+          card.innerHTML = `<div class="lc-header" style="font-size:1.1rem">${
+            icons[rt] || "🤝"
+          } ${titles[rt] || "End"}</div>
+      <div class="lc-section"><div class="lc-label">🎯 Score: ${
+        data.final_score || 50
+      }:${100 - (data.final_score || 50)}</div></div>
+      <div class="lc-section"><div class="lc-label">🎤 Closing</div><div class="lc-translation" style="color:var(--text);font-weight:500">${esc(
+        data.reply || ""
+      )}</div></div>
+      ${
+        data.reply_ja && bilingual
+          ? `<div class="lc-section"><div class="lc-label">🔤 Translation</div><div class="lc-translation">${esc(
+              data.reply_ja
+            )}</div></div>`
+          : ""
+      }
+      ${
+        data.advice
+          ? `<div class="lc-section"><div class="lc-label">💡 Advice</div><div class="lc-explanation">${esc(
+              data.advice
+            )}</div></div>`
+          : ""
+      }
+      <div style="text-align:center;margin-top:12px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="report-btn" id="report-btn" onclick="genReport()">📄 Generate Report</button>
+        <button onclick="location.reload()" style="padding:10px 28px;border-radius:20px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 New Debate</button>
+      </div>`;
+          chatEl.appendChild(card);
+          scroll();
+          if (narrOn && data.reply && g === ttsGen) await speakProf(data.reply);
+          if (narrOn && bilingual && data.reply_ja && g === ttsGen)
+            await speakUser(data.reply_ja);
+          if (narrOn && data.advice && g === ttsGen)
+            await speakUser(data.advice);
+          textIn.disabled = true;
+          sendBtn.disabled = true;
+          micBtn.disabled = true;
+        } catch (e) {
+          hideTh();
+          addSys("❌ " + e.message);
+        }
+      }
+
+      // ============================================================================
+      // Report Generation
+      // ============================================================================
+      async function genReport() {
+        const btn = $("report-btn");
+        if (!btn || !SID) return;
+        const fd = window._finishData || {};
+        btn.disabled = true;
+        btn.classList.add("generating");
+        btn.textContent = "📄 Generating...";
+        addSys("📄 Generating debate report... (this may take a moment)");
+        try {
+          const res = await fetch("/debate_report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              session_id: SID,
+              result: fd.result || "draw",
+              advice: fd.advice || "",
+              gauge_history: gaugeHistory,
+              debate_info: debateInfo,
+            }),
+          });
+          if (!res.ok) {
+            const e = await res.json();
+            throw new Error(e.error || "Failed");
+          }
+          const data = await res.json();
+          btn.classList.remove("generating");
+          btn.textContent = "✅ Report Ready";
+          // Create download link
+          const link = document.createElement("a");
+          link.href = "/download_report/" + encodeURIComponent(data.filename);
+          link.download = data.filename;
+          link.target = "_blank";
+          link.style.cssText =
+            "display:inline-block;margin-top:8px;padding:10px 24px;border-radius:20px;background:linear-gradient(135deg,#e17055,#6c5ce7);color:#fff;font-weight:700;text-decoration:none;font-size:.88rem;transition:all .2s;font-family:'DM Sans',sans-serif";
+          link.textContent = "⬇️ Download: " + data.filename;
+          link.onmouseover = () => {
+            link.style.transform = "scale(1.03)";
+          };
+          link.onmouseout = () => {
+            link.style.transform = "scale(1)";
+          };
+          btn.parentElement.appendChild(document.createElement("br"));
+          btn.parentElement.appendChild(link);
+          addSys("✅ Report ready! Click the download button.");
+          scroll();
+        } catch (e) {
+          btn.classList.remove("generating");
+          btn.textContent = "❌ Retry Report";
+          btn.disabled = false;
+          addSys("❌ Report: " + e.message);
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from typing import Optional
 
 from fastapi import FastAPI, Request, UploadFile, File, Form
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, RedirectResponse
 import google.generativeai as genai
 
 try:
@@ -334,6 +334,16 @@ async def lifespan(app):
     task=asyncio.create_task(_periodic()); yield; task.cancel()
 
 app = FastAPI(title="Debate Duel", lifespan=lifespan)
+
+# =====================================================================
+# Auth (test credentials)
+# =====================================================================
+AUTH_COOKIE = "debate_auth"
+AUTH_USER = "test_user"
+AUTH_PASS = "test"
+
+def _is_logged_in(request: Request) -> bool:
+    return request.cookies.get(AUTH_COOKIE) == AUTH_USER
 
 # =====================================================================
 # Topics
@@ -824,9 +834,35 @@ async def download_report(filename: str):
         return JSONResponse({"error":"not found"},404)
     return FileResponse(str(filepath), media_type="text/html", filename=filename)
 
+@app.post("/api/login")
+async def login(request: Request):
+    try:
+        d = await request.json()
+        username = (d.get("username") or "").strip()
+        password = d.get("password") or ""
+        if username == AUTH_USER and password == AUTH_PASS:
+            r = JSONResponse({"success": True})
+            r.set_cookie(key=AUTH_COOKIE, value=AUTH_USER, path="/", max_age=86400 * 7)  # 7 days
+            return r
+        return JSONResponse({"success": False, "error": "ユーザー名またはパスワードが正しくありません。"}, status=401)
+    except Exception:
+        return JSONResponse({"success": False, "error": "リクエストが不正です。"}, status=400)
+
+@app.post("/api/logout")
+async def logout():
+    r = RedirectResponse(url="/", status_code=302)
+    r.delete_cookie(key=AUTH_COOKIE, path="/")
+    return r
+
+@app.get("/api/check_auth")
+async def check_auth(request: Request):
+    return {"logged_in": _is_logged_in(request)}
+
 @app.get("/", response_class=HTMLResponse)
-async def index():
-    return HTMLResponse((Path(__file__).parent / "debate_app.html").read_text(encoding="utf-8"))
+async def index(request: Request):
+    if _is_logged_in(request):
+        return HTMLResponse((Path(__file__).parent / "debate_app.html").read_text(encoding="utf-8"))
+    return HTMLResponse((Path(__file__).parent / "login.html").read_text(encoding="utf-8"))
 
 if __name__ == "__main__":
     import uvicorn

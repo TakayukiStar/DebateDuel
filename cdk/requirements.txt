@@ -1,0 +1,5 @@
+# AWS CDK 依存パッケージ
+# インストール: pip install -r cdk/requirements.txt
+
+aws-cdk-lib>=2.170.0
+constructs>=10.0.0

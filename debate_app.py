@@ -339,8 +339,8 @@ app = FastAPI(title="Debate Duel", lifespan=lifespan)
 # Auth (test credentials)
 # =====================================================================
 AUTH_COOKIE = "debate_auth"
-AUTH_USER = "test_user"
-AUTH_PASS = "test"
+AUTH_USER = "test_1"
+AUTH_PASS = "adoasjfaj1"
 
 def _is_logged_in(request: Request) -> bool:
     return request.cookies.get(AUTH_COOKIE) == AUTH_USER

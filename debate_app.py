@@ -402,6 +402,10 @@ ALL_TOPICS = [
 # =====================================================================
 # Endpoints
 # =====================================================================
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 @app.get("/languages")
 async def get_languages():
     return [{"code":k,"name":v[0]} for k,v in sorted(LANG.items(), key=lambda x:x[1][0])]
